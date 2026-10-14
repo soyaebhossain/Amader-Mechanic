@@ -1,0 +1,728 @@
+openapi: 3.0.3
+info:
+  title: Roadside Assistance BD API
+  version: 1.0.0
+  description: Modular Monolith API for roadside breakdown recovery in Bangladesh
+paths:
+  /api/v1/accounts/profile/:
+    get:
+      operationId: v1_accounts_profile_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: v1_accounts_profile_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: v1_accounts_profile_partial_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/dispatch/offers/:
+    get:
+      operationId: v1_dispatch_offers_list
+      summary: List active dispatch offers for the logged in mechanic/provider
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DispatchOffer'
+          description: ''
+  /api/v1/dispatch/offers/{id}/accept/:
+    post:
+      operationId: v1_dispatch_offers_accept_create
+      summary: Accept a dispatch offer (concurrency-safe single winner lock)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DispatchOffer'
+          description: ''
+  /api/v1/payments/checkout/initiate/:
+    post:
+      operationId: v1_payments_checkout_initiate_create
+      summary: Initiate payment checkout session (bKash, SSLCommerz, Nagad)
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateCheckoutRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InitiateCheckoutRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InitiateCheckoutRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiateCheckoutResponse'
+          description: ''
+  /api/v1/payments/webhooks/bkash/:
+    get:
+      operationId: v1_payments_webhooks_bkash_retrieve
+      description: 'bKash passes query params on redirect: paymentID, status, api_key.'
+      summary: bKash tokenized gateway redirect callback
+      parameters:
+      - in: query
+        name: paymentID
+        schema:
+          type: string
+        description: bKash Payment ID
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Transaction status
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ''
+  /api/v1/payments/webhooks/nagad/:
+    get:
+      operationId: v1_payments_webhooks_nagad_retrieve
+      description: |-
+        Nagad invokes this endpoint on transaction completion or failure:
+        GET /api/v1/payments/webhooks/nagad/?payment_ref_id=...&status=...
+      summary: Nagad PGW redirect callback
+      parameters:
+      - in: query
+        name: payment_ref_id
+        schema:
+          type: string
+        description: Nagad Payment Reference ID
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Transaction status (e.g. Success, Failed)
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ''
+  /api/v1/payments/webhooks/sslcommerz/:
+    post:
+      operationId: v1_payments_webhooks_sslcommerz_create
+      summary: SSLCommerz IPN webhook notification
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ''
+  /api/v1/providers/active/:
+    get:
+      operationId: v1_providers_active_list
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProviderProfile'
+          description: ''
+  /api/v1/providers/me/:
+    get:
+      operationId: v1_providers_me_retrieve
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderProfile'
+          description: ''
+    put:
+      operationId: v1_providers_me_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProviderProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProviderProfile'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderProfile'
+          description: ''
+    patch:
+      operationId: v1_providers_me_partial_update
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProviderProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProviderProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProviderProfile'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderProfile'
+          description: ''
+  /api/v1/service-requests/:
+    get:
+      operationId: v1_service_requests_list
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceRequest'
+          description: ''
+    post:
+      operationId: v1_service_requests_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ServiceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ServiceRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceRequest'
+          description: ''
+  /api/v1/service-requests/{id}/:
+    get:
+      operationId: v1_service_requests_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceRequest'
+          description: ''
+components:
+  schemas:
+    DispatchOffer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        service_request:
+          allOf:
+          - $ref: '#/components/schemas/ServiceRequest'
+          readOnly: true
+        provider:
+          type: string
+          format: uuid
+        status:
+          type: string
+          maxLength: 20
+        offered_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - expires_at
+      - id
+      - offered_at
+      - provider
+      - service_request
+    InitiateCheckoutRequest:
+      type: object
+      properties:
+        payment_intent_id:
+          type: string
+          format: uuid
+          description: UUID of the pending PaymentIntent
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          default: BKASH
+          description: |-
+            Gateway choice
+
+            * `BKASH` - bKash Tokenized
+            * `SSLCOMMERZ` - SSLCommerz
+            * `NAGAD` - Nagad Direct PGW
+        callback_url:
+          type: string
+          format: uri
+          description: Client redirect URL after transaction
+      required:
+      - callback_url
+      - payment_intent_id
+    InitiateCheckoutResponse:
+      type: object
+      properties:
+        redirect_url:
+          type: string
+          description: Redirect payment gateway URL
+        payment_id:
+          type: string
+          description: Gateway session reference
+        order_id:
+          type: string
+        gateway_response:
+          type: object
+          additionalProperties: {}
+      required:
+      - redirect_url
+    PatchedProviderProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        provider_type:
+          type: string
+          maxLength: 32
+        verification_status:
+          allOf:
+          - $ref: '#/components/schemas/VerificationStatusEnum'
+          readOnly: true
+        is_online:
+          type: boolean
+        latitude:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        service_radius_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          readOnly: true
+    PatchedUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        phone_number:
+          type: string
+          maxLength: 16
+        full_name:
+          type: string
+          maxLength: 150
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        preferred_language:
+          type: string
+          maxLength: 5
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    ProviderEnum:
+      enum:
+      - BKASH
+      - SSLCOMMERZ
+      - NAGAD
+      type: string
+      description: |-
+        * `BKASH` - bKash Tokenized
+        * `SSLCOMMERZ` - SSLCommerz
+        * `NAGAD` - Nagad Direct PGW
+    ProviderProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        provider_type:
+          type: string
+          maxLength: 32
+        verification_status:
+          allOf:
+          - $ref: '#/components/schemas/VerificationStatusEnum'
+          readOnly: true
+        is_online:
+          type: boolean
+        latitude:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        service_radius_km:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        rating:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - id
+      - latitude
+      - longitude
+      - rating
+      - user
+      - verification_status
+    ServiceRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        customer:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        assigned_provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderProfile'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        pickup_address:
+          type: string
+        latitude:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+          readOnly: true
+        problem_description:
+          type: string
+        status_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceRequestEvent'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assigned_provider
+      - created_at
+      - customer
+      - id
+      - latitude
+      - longitude
+      - pickup_address
+      - status
+      - status_events
+      - updated_at
+    ServiceRequestEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        from_status:
+          type: string
+          maxLength: 36
+        to_status:
+          type: string
+          maxLength: 36
+        reason:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - from_status
+      - id
+      - timestamp
+      - to_status
+    StatusEnum:
+      enum:
+      - requested
+      - matching
+      - assigned
+      - en_route
+      - arrived
+      - inspection
+      - awaiting_quote_approval
+      - awaiting_payment
+      - in_progress
+      - completed
+      - cancelled
+      type: string
+      description: |-
+        * `requested` - Requested
+        * `matching` - Matching
+        * `assigned` - Assigned
+        * `en_route` - En Route
+        * `arrived` - Arrived
+        * `inspection` - Inspection
+        * `awaiting_quote_approval` - Awaiting Quote Approval
+        * `awaiting_payment` - Awaiting Payment
+        * `in_progress` - In Progress
+        * `completed` - Completed
+        * `cancelled` - Cancelled
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        phone_number:
+          type: string
+          maxLength: 16
+        full_name:
+          type: string
+          maxLength: 150
+        email:
+          nullable: true
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        preferred_language:
+          type: string
+          maxLength: 5
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - phone_number
+    VerificationStatusEnum:
+      enum:
+      - pending
+      - verified
+      - suspended
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `verified` - Verified
+        * `suspended` - Suspended
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
