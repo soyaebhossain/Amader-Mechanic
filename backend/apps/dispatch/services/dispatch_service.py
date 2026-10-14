@@ -87,3 +87,54 @@ class DispatchService:
         )
 
         return offer
+
+    @classmethod
+    def auto_dispatch(cls, service_request: ServiceRequest, initial_radius_km: int = 15) -> int:
+        """
+        Automatically locates candidate verified active mechanics and dispatches offers.
+        Advances request state from 'requested' to 'matching'.
+        """
+        from apps.providers.models import ProviderProfile
+
+        RequestStateMachine.transition_to(
+            service_request=service_request,
+            new_status='matching',
+            reason=f"Automated radius matching initiated (Radius: {initial_radius_km}km)"
+        )
+
+        candidates = ProviderProfile.objects.filter(
+            is_active=True,
+            is_verified=True
+        )
+
+        # Geographic proximity filter if location coordinates are provided
+        if service_request.location:
+            try:
+                from django.contrib.gis.measure import D
+                candidates = candidates.filter(
+                    location__distance_lte=(service_request.location, D(km=initial_radius_km))
+                )
+            except Exception as e:
+                logger.warning(f"Spatial distance filter fallback: {e}")
+
+        candidates = candidates[:5] # Top 5 closest candidate mechanics
+        offers_created = 0
+
+        for provider in candidates:
+            cls.create_offer(service_request, provider)
+            offers_created += 1
+
+            # Dispatch SMS alert to mechanic
+            try:
+                from apps.notifications.tasks import send_transactional_sms_task
+                msg = f"জরুরি রোডসাইড রিকোয়েস্ট! এলাকা: {service_request.address_text or 'কাছাকাছি'}। গ্রহণ করতে অ্যাপ চেক করুন।"
+                send_transactional_sms_task.delay(
+                    phone=provider.user.phone_number,
+                    message=msg,
+                    template_key="PROVIDER_JOB_OFFER",
+                    user_id=str(provider.user.id)
+                )
+            except Exception as sms_err:
+                logger.error(f"Failed to dispatch SMS to provider: {sms_err}")
+
+        return offers_created

@@ -13,7 +13,13 @@ class ServiceRequestListCreateView(generics.ListCreateAPIView):
         return ServiceRequest.objects.filter(customer=user)
 
     def perform_create(self, serializer):
-        serializer.save(customer=self.request.user)
+        req = serializer.save(customer=self.request.user)
+        try:
+            from apps.dispatch.services.dispatch_service import DispatchService
+            DispatchService.auto_dispatch(req)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"Auto-dispatch error on create: {e}")
 
 class ServiceRequestDetailView(generics.RetrieveAPIView):
     serializer_class = ServiceRequestSerializer
