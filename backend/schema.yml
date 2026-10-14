@@ -70,6 +70,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
+  /api/v1/catalog/services/:
+    get:
+      operationId: v1_catalog_services_list
+      description: API endpoint allowing clients to browse active emergency assistance
+        catalog services.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceItem'
+          description: ''
+  /api/v1/catalog/services/{id}/:
+    get:
+      operationId: v1_catalog_services_retrieve
+      description: API endpoint allowing clients to browse active emergency assistance
+        catalog services.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this service item.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceItem'
+          description: ''
   /api/v1/dispatch/offers/:
     get:
       operationId: v1_dispatch_offers_list
@@ -110,6 +156,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DispatchOffer'
+          description: ''
+  /api/v1/financial/provider/payout-account/:
+    get:
+      operationId: v1_financial_provider_payout_account_retrieve
+      summary: Retrieve authenticated provider payout account
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderPayoutAccount'
+          description: ''
+    put:
+      operationId: v1_financial_provider_payout_account_update
+      summary: Update authenticated provider payout account
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderPayoutAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProviderPayoutAccount'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProviderPayoutAccount'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderPayoutAccount'
+          description: ''
+  /api/v1/financial/provider/payout-account/confirm-change/:
+    post:
+      operationId: v1_financial_provider_payout_account_confirm_change_create
+      summary: Confirm and commit payout account modification with OTP
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPayoutAccountChangeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmPayoutAccountChangeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConfirmPayoutAccountChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmPayoutAccountChangeResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/financial/provider/payout-account/request-change/:
+    post:
+      operationId: v1_financial_provider_payout_account_request_change_create
+      summary: Request 6-digit OTP to change payout account destination
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderPayoutAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProviderPayoutAccount'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProviderPayoutAccount'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestPayoutAccountChangeResponse'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
           description: ''
   /api/v1/payments/checkout/initiate/:
     post:
@@ -305,6 +462,235 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProviderProfile'
           description: ''
+  /api/v1/quotes/:
+    get:
+      operationId: v1_quotes_list
+      description: API for managing diagnostic quotes and customer approvals.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ServiceQuote'
+          description: ''
+    post:
+      operationId: v1_quotes_create
+      description: API for managing diagnostic quotes and customer approvals.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceQuote'
+          description: ''
+  /api/v1/quotes/{id}/:
+    get:
+      operationId: v1_quotes_retrieve
+      description: API for managing diagnostic quotes and customer approvals.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this service quote.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceQuote'
+          description: ''
+    put:
+      operationId: v1_quotes_update
+      description: API for managing diagnostic quotes and customer approvals.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this service quote.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceQuote'
+          description: ''
+    patch:
+      operationId: v1_quotes_partial_update
+      description: API for managing diagnostic quotes and customer approvals.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this service quote.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedServiceQuote'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedServiceQuote'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedServiceQuote'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceQuote'
+          description: ''
+    delete:
+      operationId: v1_quotes_destroy
+      description: API for managing diagnostic quotes and customer approvals.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this service quote.
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/quotes/{id}/approve/:
+    post:
+      operationId: v1_quotes_approve_create
+      description: API for managing diagnostic quotes and customer approvals.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this service quote.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceQuote'
+          description: ''
+  /api/v1/quotes/{id}/reject/:
+    post:
+      operationId: v1_quotes_reject_create
+      description: API for managing diagnostic quotes and customer approvals.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this service quote.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ServiceQuote'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceQuote'
+          description: ''
   /api/v1/service-requests/:
     get:
       operationId: v1_service_requests_list
@@ -370,8 +756,176 @@ paths:
               schema:
                 $ref: '#/components/schemas/ServiceRequest'
           description: ''
+  /api/v1/vehicles/:
+    get:
+      operationId: v1_vehicles_list
+      description: CRUD API for customers to register and manage their vehicles.
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vehicle'
+          description: ''
+    post:
+      operationId: v1_vehicles_create
+      description: CRUD API for customers to register and manage their vehicles.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+  /api/v1/vehicles/{id}/:
+    get:
+      operationId: v1_vehicles_retrieve
+      description: CRUD API for customers to register and manage their vehicles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+    put:
+      operationId: v1_vehicles_update
+      description: CRUD API for customers to register and manage their vehicles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+    patch:
+      operationId: v1_vehicles_partial_update
+      description: CRUD API for customers to register and manage their vehicles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicle'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicle'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVehicle'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+          description: ''
+    delete:
+      operationId: v1_vehicles_destroy
+      description: CRUD API for customers to register and manage their vehicles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
+    ConfirmPayoutAccountChangeRequest:
+      type: object
+      properties:
+        otp:
+          type: string
+          maxLength: 6
+          minLength: 4
+      required:
+      - otp
+    ConfirmPayoutAccountChangeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/ProviderPayoutAccount'
+      required:
+      - data
+      - message
     DispatchOffer:
       type: object
       properties:
@@ -481,6 +1035,50 @@ components:
           format: decimal
           pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
           readOnly: true
+    PatchedServiceQuote:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        service_request:
+          type: string
+          format: uuid
+        provider:
+          type: string
+          format: uuid
+        provider_name:
+          type: string
+          readOnly: true
+        provider_phone:
+          type: string
+          readOnly: true
+        estimated_labor_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        estimated_parts_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        breakdown_notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/ServiceQuoteStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
     PatchedUser:
       type: object
       properties:
@@ -511,6 +1109,49 @@ components:
           type: string
           format: date-time
           readOnly: true
+    PatchedVehicle:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+        license_plate:
+          type: string
+          maxLength: 30
+        vehicle_type:
+          type: string
+          maxLength: 50
+        make:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 50
+        year:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        color:
+          type: string
+          maxLength: 30
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PreferredMethodEnum:
+      enum:
+      - BKASH
+      - BANK_TRANSFER
+      type: string
+      description: |-
+        * `BKASH` - bKash B2C Disbursement
+        * `BANK_TRANSFER` - Bank Transfer (BEFTN/NPSB)
     ProviderEnum:
       enum:
       - BKASH
@@ -521,6 +1162,54 @@ components:
         * `BKASH` - bKash Tokenized
         * `SSLCOMMERZ` - SSLCommerz
         * `NAGAD` - Nagad Direct PGW
+    ProviderPayoutAccount:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        preferred_method:
+          $ref: '#/components/schemas/PreferredMethodEnum'
+        bkash_wallet_number:
+          type: string
+          nullable: true
+          maxLength: 20
+        bank_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        branch_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        routing_number:
+          type: string
+          nullable: true
+          maxLength: 15
+        account_number:
+          type: string
+          nullable: true
+          maxLength: 50
+        account_holder_name:
+          type: string
+          nullable: true
+          maxLength: 150
+        is_verified:
+          type: boolean
+          readOnly: true
+        hold_payouts:
+          type: boolean
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - hold_payouts
+      - id
+      - is_verified
+      - updated_at
     ProviderProfile:
       type: object
       properties:
@@ -567,6 +1256,109 @@ components:
       - rating
       - user
       - verification_status
+    RequestPayoutAccountChangeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        expires_in_seconds:
+          type: integer
+        masked_phone:
+          type: string
+      required:
+      - expires_in_seconds
+      - masked_phone
+      - message
+    ServiceItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+        base_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        is_active:
+          type: boolean
+      required:
+      - code
+      - id
+      - name
+    ServiceQuote:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        service_request:
+          type: string
+          format: uuid
+        provider:
+          type: string
+          format: uuid
+        provider_name:
+          type: string
+          readOnly: true
+        provider_phone:
+          type: string
+          readOnly: true
+        estimated_labor_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        estimated_parts_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        breakdown_notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/ServiceQuoteStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - provider
+      - provider_name
+      - provider_phone
+      - service_request
+      - total_amount
+      - updated_at
+    ServiceQuoteStatusEnum:
+      enum:
+      - draft
+      - submitted
+      - approved
+      - rejected
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `submitted` - Submitted to Customer
+        * `approved` - Approved by Customer
+        * `rejected` - Rejected by Customer
     ServiceRequest:
       type: object
       properties:
@@ -584,7 +1376,7 @@ components:
           readOnly: true
         status:
           allOf:
-          - $ref: '#/components/schemas/StatusEnum'
+          - $ref: '#/components/schemas/ServiceRequestStatusEnum'
           readOnly: true
         pickup_address:
           type: string
@@ -648,7 +1440,7 @@ components:
       - id
       - timestamp
       - to_status
-    StatusEnum:
+    ServiceRequestStatusEnum:
       enum:
       - requested
       - matching
@@ -708,6 +1500,47 @@ components:
       - created_at
       - id
       - phone_number
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+        license_plate:
+          type: string
+          maxLength: 30
+        vehicle_type:
+          type: string
+          maxLength: 50
+        make:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 50
+        year:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        color:
+          type: string
+          maxLength: 30
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - license_plate
+      - owner
+      - vehicle_type
     VerificationStatusEnum:
       enum:
       - pending

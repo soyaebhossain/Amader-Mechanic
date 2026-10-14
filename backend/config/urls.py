@@ -21,4 +21,7 @@ urlpatterns = [
     path('api/v1/service-requests/', include('apps.service_requests.urls')),
     path('api/v1/dispatch/', include('apps.dispatch.urls')),
     path('api/v1/financial/', include('apps.financial_ledger.urls')),
+    path('api/v1/catalog/', include('apps.service_catalog.urls')),
+    path('api/v1/vehicles/', include('apps.vehicles.urls')),
+    path('api/v1/quotes/', include('apps.pricing_quotes.urls')),
 ]
